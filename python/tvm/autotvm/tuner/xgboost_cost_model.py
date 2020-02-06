@@ -31,6 +31,7 @@ from .. import feature
 from ..util import get_rank
 from .metric import max_curve, recall_curve, cover_curve
 from .model_based_tuner import CostModel, FeatureCache
+from .tuner import SavedFeature
 
 logger = logging.getLogger('autotvm')
 
@@ -86,6 +87,8 @@ class XGBoostCostModel(CostModel):
         self.loss_type = loss_type
         self.num_threads = num_threads
         self.log_interval = log_interval
+
+        self.saved_features = {}
 
         if loss_type == 'reg':
             self.xgb_params = {
@@ -310,7 +313,12 @@ class XGBoostCostModel(CostModel):
             pool = self._get_pool()
             feas = pool.map(self.feature_extract_func, need_extract)
             for i, fea in zip(need_extract, feas):
-                fea_cache[i] = fea
+                fea_cache[i] = fea[0]
+                if i in self.saved_features.keys():
+                    self.saved_features[i].set_feature(fea[1])
+                    self.saved_features[i].set_config(fea[2])
+                else:
+                    self.saved_features[i] = SavedFeature(config=fea[2], feature=fea[1])
 
         feature_len = None
         for idx in indexes:
@@ -340,7 +348,9 @@ def _extract_itervar_feature_index(index):
             sch, args = _extract_task.instantiate(config)
         fea = feature.get_itervar_feature_flatten(sch, args, take_log=True)
         fea = np.concatenate((fea, list(config.get_other_option().values())))
-        return fea
+        fea2 = feature.get_itervar_feature(sch, args, take_log=False)
+        fea2 = np.concatenate((fea2, list(config.get_other_option().values())))
+        return fea, fea2, config
     except Exception:  # pylint: disable=broad-except
         return None
 

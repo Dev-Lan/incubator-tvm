@@ -26,6 +26,22 @@ from ..env import GLOBAL_SCOPE
 
 logger = logging.getLogger('autotvm')
 
+class SavedFeature:
+    def __init__(self, config=None, feature=None, result=None):
+        self.config = config
+        self.feature = feature
+        self.result = result
+
+    def set_result(self, result):
+        self.result = result
+
+    def set_config(self,config):
+        self.config = config
+
+    def set_feature(self, feature):
+        self.feature = feature
+
+
 class Tuner(object):
     """Base class for tuners
 
@@ -148,6 +164,14 @@ class Tuner(object):
             self.ttl = min(early_stopping + self.best_iter, n_trial) - i
 
             self.update(inputs, results)
+            for k, (inp, res) in enumerate(zip(inputs, results)):
+                if inp.config.index in self.cost_model.saved_features.keys():
+                    self.cost_model.saved_features[inp.config.index].set_result(res)
+                else:
+                    self.cost_model.saved_features[inp.config.index] = SavedFeature(result=res)
+            inputs = [MeasureInput(self.task.target, self.task, config) for config in configs]
+            results = measure_batch(inputs)
+
             for callback in callbacks:
                 callback(self, inputs, results)
 

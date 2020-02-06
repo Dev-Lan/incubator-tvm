@@ -15,6 +15,26 @@
 <!--- specific language governing permissions and limitations -->
 <!--- under the License. -->
 
+Install
+-------
+
+Follow instructions on https://docs.tvm.ai/install/from_source.html, 
+including LLVM, Python Method 1 installation, and all Python dependencies
+such as ANTLR4.
+
+Read Data
+---------
+
+For reading data,
+```
+import pickle
+with open('task0.pkl', 'rb') as f:
+    features = pickle.load(f)
+```
+Data is contained in `features[index].config`, `features[index].feature`, and `features[index].result`.
+
+
+
 <img src=https://raw.githubusercontent.com/apache/incubator-tvm-site/master/images/logo/tvm-logo-small.png width=128/> Open Deep Learning Compiler Stack
 ==============================================
 [Documentation](https://docs.tvm.ai) |
