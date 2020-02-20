@@ -122,8 +122,7 @@ tuning_option = {
 
     'measure_option': autotvm.measure_option(
         builder=autotvm.LocalBuilder(),
-        runner=autotvm.LocalRunner(number=3, repeat=1),
-                                   #min_repeat_ms=1000),
+        runner=autotvm.LocalRunner(number=10, repeat=1, min_repeat_ms=500),
     ),
 }
 
@@ -171,9 +170,9 @@ def tune_kernels(tasks,
                        callbacks=[
                            autotvm.callback.progress_bar(n_trial, prefix=prefix),
                            autotvm.callback.log_to_file(log_filename)])
-        with open('task%i.pickle' % i, 'wb') as output:
-                pickle.dump(tuner_obj.cost_model.saved_features, output, pickle.HIGHEST_PROTOCOL)
-        print('Saved task%i.pickle' % i)
+        with open('data/task%i.pickle' % i, 'wb') as output:
+                pickle.dump([task, tuner_obj.cost_model.saved_features], output, pickle.HIGHEST_PROTOCOL)
+        print('Saved data/task%i.pickle' % i)
 
 
 # Use graph tuner to achieve graph level optimal schedules
