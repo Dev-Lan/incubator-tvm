@@ -27,6 +27,19 @@ Read Data
 
 For reading data,
 ```
+import numpy as np
+data = np.load('task%i.npz' % i)
+x_train_configs = data['x_train_configs']
+x_train = data['x_train']
+y_train = data['y_train']
+x_test_configs = data['x_test_configs']
+x_test = data['x_test']
+y_test = data['y_test']
+task = data['task'][0]
+```
+
+Or for reading original unflattened data (requires TVM install):
+```
 import pickle
 with open('task0.pkl', 'rb') as f:
     features = pickle.load(f)
